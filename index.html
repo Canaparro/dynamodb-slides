@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>DynamoDB overview</title>
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/simple.css">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="plugin/highlight/monokai.css">
+
+		<style>
+			.container{
+				display: flex;
+			}
+			.col {
+				flex: 1;
+			}
+			.center {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<div class="container">
+						<h2 class="col center" style='color:rgb(25, 146, 186);'>DynamoDB overview</h2>
+						<img width="auto" height="400"  src="https://amazon-dynamodb-labs.com/images/Amazon-DynamoDB.png">
+					</div>
+				</section>
+				<section>
+					<h2>Thinking about it as a hashtable</h2>
+					<img width="auto" height="300" src="https://upload.wikimedia.org/wikipedia/commons/7/7d/Hash_table_3_1_1_0_1_0_0_SP.svg">
+					<ul>
+						<li class="fragment">Data is stored in a partitioned fashion using a partition key</li>
+						<li class="fragment">Searching without knowing the key is very costly</li>
+						<li class="fragment">If you know the key you can retrieve the data in constant time, no matter how much data you have</li>
+					</ul>
+				</section>
+				<section>
+					<p>DynamoDB works like that</p>
+					<img src="https://d2908q01vomqb2.cloudfront.net/887309d048beef83ad3eabf2a79a64a389ab1c9f/2022/08/15/DBBLOG-2555-image003.png">	
+				</section>
+				<section>
+					<p>To be honest it looks more like this</p>
+					<img width="auto" height="600" src="https://user-images.githubusercontent.com/6509926/179855664-a0adb905-eb5e-4d75-b5a9-2dc28a5a350e.png">
+				</section>
+				<section>
+					<h2>Performance</h2>
+					<img src="https://pbs.twimg.com/media/EdEtV9SXkAAP0yP?format=png&name=small">
+				</section>
+				<section>
+					<h2>Eventual consistency</h2>
+					<img src="https://user-images.githubusercontent.com/6509926/179993877-a809c319-a671-42e9-8bf5-86a5a489e10b.png">
+				</section>
+				<section>
+					<h2>Keys & Schema</h2>
+					<img src="https://d2908q01vomqb2.cloudfront.net/887309d048beef83ad3eabf2a79a64a389ab1c9f/2018/09/10/dynamodb-partition-key-1.gif">
+				</section>
+				<section>
+					<h2>Searching for data</h2>
+					<div class="container">
+						<div class="col center">
+						<ul>
+							<li class="fragment">🔑 You search by partition and sort keys, not by attributes.</li>
+							<li class="fragment">✅ Queries</li>
+							<li class="fragment">❌ Scans (Please, don't use it)</li>
+							<li class="fragment">🧐 Because you pay for what you read</li>
+						</ul>
+						</div>
+						<img class="col" src="https://d2908q01vomqb2.cloudfront.net/887309d048beef83ad3eabf2a79a64a389ab1c9f/2018/09/10/dynamodb-partition-key-1.gif">
+						<aside class="notes">
+							<li>scan</li>
+							<li>scan filter - still reads everything</li>
+							<li>query with partition only</li>
+							<li>query with sort key - show EqualTo BeginsWith between </li>
+						</aside>
+					</div>
+				</section>
+				<section>
+					<h2>Demo time</h2>
+				</section>
+				<section>
+					<h2>Indexes</h2>
+					<ul>
+						<li>Local secondary index (LSI)</li>
+						<li>Global secondary index (GSI)</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Local secondary index (LSI)</h2>
+					<img width="auto" height="500" src="images/LSI.png">
+				</section>
+				<section>
+					<h2>Local secondary index (LSI)</h2>
+					<div class="container">
+						<div class="col center">
+							<ul>
+								<li class="fragment">Has to be defined at table creation time</li>
+								<li class="fragment">Can take advantage of consistent reads</li>
+								<li class="fragment">You can only have 5 LSIs per table</li>
+								<li class="fragment">Allows duplicated sort key per partition key</li>
+								<li class="fragment">Have access to non projected attributes</li>
+								<li class="fragment">Locks partition size, the combined size of a partition and its LSIs cannot surpass 10GB</li>
+							</ul>
+						</div>
+						<img class="col" src="images/LSI.png">
+						<aside class="notes">
+							<li>query on index - show the projection and the read capacity consumed</li>
+						</aside>
+					</div>
+				</section>
+				<section>
+					<h2>Demo time on LSIs</h2>
+				</section>
+				<section>
+					<h2>Global secondary index (GSI)</h2>
+					<img width="auto" height="500" src="images/GSI.jpg">
+				</section>
+				<section>
+					<h2>Global secondary index (GSI)</h2>
+					<div class="container">
+						<div class="col center">
+							<ul>
+								<li class="fragment">Can create at any time</li>
+								<li class="fragment">Supports only eventualy consistent reads</li>
+								<li class="fragment">You can have 20 GSIs per table</li>
+								<li class="fragment">Have access only to projected attributes</li>
+							</ul>
+						</div>
+						<img class="col" src="images/GSI.jpg">
+					</div>
+				</section>
+				<section>
+					<h2>Demo time on GSIs</h2>
+				</section>
+				<section>
+					<h2>Optimistic locking</h2>
+					<img src="https://docs.aws.amazon.com/images/amazondynamodb/latest/developerguide/images/update-yes-condition.png">
+				</section>
+				<section>
+					<h2>DynamoDB transactions</h2>
+					<ul>
+						<li class="fragment">Support 100 write operations on distinct items</li>
+						<li class="fragment">It is an all or nothing operation</li>
+						<li class="fragment">Can involve items from multiple tables</li>
+						<li class="fragment">The total size of the items cannot exceed 4Mb</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Demo time, last one I promise</h2>
+				</section>
+				<section>
+					<blockquote>A well-optimized single-table DynamoDB layout looks more like machine code than a simple spreadsheet</blockquote>
+					Forrest Brazeal - AWS Serverless Hero
+				</section>
+			</div>
+		</div>
+
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// The "normal" size of the presentation, aspect ratio will
+				// be preserved when the presentation is scaled to fit different
+				// resolutions. Can be specified using percentage units.
+				width: '100%',
+				height: '100%',
+
+				// Factor of the display size that should remain empty around
+				// the content
+				margin: 0.05,
+
+				// Bounds for smallest/largest possible scale to apply to content
+				minScale: 0.2,
+				maxScale: 2.0,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>
